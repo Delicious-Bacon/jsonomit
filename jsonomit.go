@@ -1,5 +1,5 @@
 // Package jsonomit provides JSON marshal functions to omit empty structs
-// and null fields. By default, the functions omit empty structs.
+// and null fields.
 //
 // Provided functions can omit zero value time.Time fields, or null fields that
 // result from custom MarshalJSON implementations.
@@ -32,6 +32,9 @@ var (
 	// Cleans up null fields.
 	/* "field":null */
 	OptionNull = option{2}
+	// Cleans up empty structs.
+	/* "field":{} */
+	OptionStruct = option{3}
 )
 
 // option is used to specify which fields to clean up from the JSON
@@ -85,18 +88,30 @@ func MarshalCustom(v any, opts ...option) ([]byte, error) {
 	}
 
 	// Clean the JSON from empty values of the given options.
+
+	count := len(opts)
+	var cleanStructs bool
 	for _, opt := range opts {
+		if opt == OptionStruct {
+			cleanStructs = true
+			count--
+			continue
+		}
 
 		b = opt_Rgx[opt].ReplaceAll(b, []byte(""))
 	}
-	b = bytes.Replace(b, []byte(`,}`), []byte(`}`), -1)
-
-	// Clean the JSON from empty structs.
-	for emptyStructRGX.Match(b) {
-
-		b = emptyStructRGX.ReplaceAll(b, []byte(""))
-
+	if count > 0 {
 		b = bytes.Replace(b, []byte(`,}`), []byte(`}`), -1)
+	}
+
+	if cleanStructs {
+		// Clean the JSON from empty structs.
+		for emptyStructRGX.Match(b) {
+
+			b = emptyStructRGX.ReplaceAll(b, []byte(""))
+
+			b = bytes.Replace(b, []byte(`,}`), []byte(`}`), -1)
+		}
 	}
 
 	return b, nil

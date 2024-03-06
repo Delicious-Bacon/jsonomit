@@ -126,12 +126,24 @@ func TestMarshal(t *testing.T) {
 	} else {
 		t.Logf("Slice of empty struct: OK!")
 	}
+
+	// Map of empty structs.
+	b, err = Marshal(map[string]struct{}{"a": {}, "b": {}, "c": {}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want = `{}`
+	if string(b) != want {
+		t.Fatalf("Want, got:\n%s\n%s", want, string(b))
+	} else {
+		t.Logf("Map of empty struct: OK!")
+	}
 }
 
 func TestMarshalCustom(t *testing.T) {
 
 	// With values
-	b, err := MarshalCustom(withVals, OptionTime)
+	b, err := MarshalCustom(withVals, OptionTime, OptionStruct)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -140,11 +152,10 @@ func TestMarshalCustom(t *testing.T) {
 		t.Fatalf("Failed want!\nWanted:\n%s\nGot:\n%s", want, string(b))
 	} else {
 		t.Log("With values: OK!")
-		t.Log(string(b))
 	}
 
 	// With no values
-	b, err = MarshalCustom(testStruct{}, OptionTime)
+	b, err = MarshalCustom(testStruct{}, OptionTime, OptionStruct)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -153,6 +164,29 @@ func TestMarshalCustom(t *testing.T) {
 		t.Fatalf("Failed want!\nWanted:\n%s\nGot:\n%s", want, string(b))
 	} else {
 		t.Log("With no values: OK!")
-		t.Log(string(b))
+	}
+
+	// Map of time structs.
+	b, err = MarshalCustom(map[string]struct{ T time.Time }{"a": {ts}, "b": {}, "c": {}}, OptionTime)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want = `{"a":{"T":"1970-01-01T00:00:00Z"},"b":{},"c":{}}`
+	if string(b) != want {
+		t.Fatalf("Want, got:\n%s\n%s", want, string(b))
+	} else {
+		t.Logf("Map of time struct: OK!")
+	}
+
+	// Map of time structs.
+	b, err = MarshalCustom(map[string]struct{ T time.Time }{"a": {ts}, "b": {}, "c": {}}, OptionTime, OptionStruct)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want = `{"a":{"T":"1970-01-01T00:00:00Z"}}`
+	if string(b) != want {
+		t.Fatalf("Want, got:\n%s\n%s", want, string(b))
+	} else {
+		t.Logf("Map of time struct #2: OK!")
 	}
 }
