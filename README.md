@@ -53,64 +53,63 @@ type testStruct struct {
 	StructEmpty struct{}
 }
 
-var (
-	ts = time.Unix(0, 0).UTC()
-
-	withVal = testStruct{
-		T:          ts,
-		TEmpty:     time.Time{},                     // will be omitted
-		StringTrap: `"Time":"0001-01-01T00:00:00Z"`, // won't be omitted
-		Custom: customStruct{
-			Value: "value",
-			valid: true,
-		},
-		CustomEmpty: customStruct{
-			Value: "empty",
-			valid: false, // will be omitted
-		},
-		Nested: nestedStruct{
-			T:          ts,
-			TEmpty:     time.Time{},
-			StringTrap: `"MyStruct":null`, // won't be omitted
-			Custom: customStruct{
-				Value: "test",
-				valid: true,
-			},
-			CustomEmpty: customStruct{
-				Value: "empty",
-				valid: false,
-			},
-		},
-		NestedEmpty: nestedStruct{ // will be omitted
-			TEmpty: time.Time{},
-			CustomEmpty: customStruct{
-				Value: "empty",
-				valid: false,
-			},
-		},
-	}
-)
-
 func main() {
     // ============================
     // Clean all empty values.
     // ============================
-	b, _ := jsonomit.MarshalIndent(withVal, "", "    ")
+    b, _ := jsonomit.MarshalIndent(
+        testStruct{
+            T:          time.Unix(0, 0).UTC(),
+            TEmpty:     time.Time{}, // will be omitted
+            StringTrap: `"Time":"0001-01-01T00:00:00Z"`,
+            Custom: customStruct{
+                Value: "value",
+                valid: true,
+            },
+            CustomEmpty: customStruct{ // will be omitted
+                Value: "empty",
+                valid: false,
+            },
+            Nested: nestedStruct{
+                T: time.Unix(0, 0).UTC(),
+                TEmpty:     time.Time{},
+                StringTrap: `"MyStruct":null`,
+                Custom: customStruct{
+                    Value: "test",
+		    valid: true,
+                },
+                CustomEmpty: customStruct{
+                    Value: "empty",
+                    valid: false,
+                },
+            },
+            NestedEmpty: nestedStruct{ // will be omitted
+                TEmpty: time.Time{},
+                CustomEmpty: customStruct{
+                    Value: "empty",
+                    valid: false,
+                },
+            },
+        },
+        "", // Prefix.
+        "    ", // Indent.
+    )
 
-	fmt.Println(string(b))
-	// {
-	//     "T": "1970-01-01T00:00:00Z",
-	//     "StringTrap": "\"Time\":\"0001-01-01T00:00:00Z\"",
-	//     "Custom": "value",
-	//     "Nested": {
-	//       "T": "1970-01-01T00:00:00Z",
-	//       "StringTrap": "\"MyStruct\":null",
-	//       "Custom": "test"
-	//     }
-	// }
+    fmt.Println(string(b))
+    // Output:
+    // {
+    //     "T": "1970-01-01T00:00:00Z",
+    //     "StringTrap": "\"Time\":\"0001-01-01T00:00:00Z\"",
+    //     "Custom": "value",
+    //     "Nested": {
+    //       "T": "1970-01-01T00:00:00Z",
+    //       "StringTrap": "\"MyStruct\":null",
+    //       "Custom": "test"
+    //     }
+    // }
 
     // ============================
-	// Customized marshal cleaning.
+    // Customized marshal cleaning.
     // ============================
     b, _ = jsonomit.MarshalCustomIndent(
         map[string]struct{
@@ -128,12 +127,13 @@ func main() {
     )
 
     fmt.Println(string(b))
-	// {
-	//   "a": {
-	//     "T": "1970-01-01T00:00:00Z"
-	//   },
-	//   "b": {},
-	//   "c": {}
-	// }
+    // Output:
+    // {
+    //     "a": {
+    //       "T": "1970-01-01T00:00:00Z"
+    //     },
+    //     "b": {},
+    //     "c": {}
+    // }
 }
 ```
