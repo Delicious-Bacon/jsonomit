@@ -98,7 +98,6 @@ func main() {
 	b, _ := jsonomit.MarshalIndent(withVal, "", "    ")
 
 	fmt.Println(string(b))
-	// Output:
 	// {
 	//     "T": "1970-01-01T00:00:00Z",
 	//     "StringTrap": "\"Time\":\"0001-01-01T00:00:00Z\"",
@@ -129,7 +128,6 @@ func main() {
     )
 
     fmt.Println(string(b))
-	// Output:
 	// {
 	//   "a": {
 	//     "T": "1970-01-01T00:00:00Z"
