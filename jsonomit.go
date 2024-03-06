@@ -1,4 +1,4 @@
-// Package jsonomit provides JSON marshal functions to omit empty structs
+// Package jsonomit provides JSON marshal functions that can omit empty structs
 // and null fields.
 //
 // Provided functions can omit zero value time.Time fields, or null fields that
