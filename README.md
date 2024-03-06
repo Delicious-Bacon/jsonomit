@@ -46,7 +46,7 @@ type testStruct struct {
 var (
 	ts = time.Unix(0, 0).UTC()
 
-	withVals = testStruct{
+	testStruct = testStruct{
 		T:          ts,
 		TEmpty:     time.Time{}, // will be omitted
 		StringTrap: `"Time":"0001-01-01T00:00:00Z"`, // won't be omitted
@@ -82,21 +82,20 @@ var (
 )
 
 func main() {
-	// Populated testStruct
-	b, _ := Marshal(withVals)
+    b, _ := Marshal(testStruct)
 
 	// Output: {"T":"1970-01-01T00:00:00Z","StringTrap":"\"Time\":\"0001-01-01T00:00:00Z\"","Custom":"value","Nested":{"T":"1970-01-01T00:00:00Z","StringTrap":"\"MyStruct\":null","Custom":"test"}}
 
-    // Output with MarhalIndent:
+    // Output with MarshalIndent:
     // {
-    //   "T": "1970-01-01T00:00:00Z",
-    //   "StringTrap": "\"Time\":\"0001-01-01T00:00:00Z\"",
-    //   "Custom": "value",
-    //   "Nested": {
     //     "T": "1970-01-01T00:00:00Z",
-    //     "StringTrap": "\"MyStruct\":null",
-    //     "Custom": "test"
-    //   }
+    //     "StringTrap": "\"Time\":\"0001-01-01T00:00:00Z\"",
+    //     "Custom": "value",
+    //     "Nested": {
+    //       "T": "1970-01-01T00:00:00Z",
+    //       "StringTrap": "\"MyStruct\":null",
+    //       "Custom": "test"
+    //     }
     // }
 
     // Customized marshal cleaning
@@ -123,3 +122,4 @@ func main() {
     //   "c": {}
     // }
 }
+```
