@@ -115,7 +115,7 @@ func main() {
         map[string]struct{
             T time.Time
         }{
-            "a": {ts},
+            "a": {time.Unix(0, 0).UTC()},
             "b": {},
             "c": {},
         },
