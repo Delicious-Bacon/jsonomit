@@ -25,6 +25,7 @@ type nestedStruct struct {
 	Level       string `json:",omitempty"`
 	Custom      customStruct
 	CustomEmpty customStruct
+	StructEmpty struct{}
 }
 
 type testStruct struct {
@@ -35,11 +36,13 @@ type testStruct struct {
 	CustomEmpty customStruct
 	Nested      nestedStruct
 	NestedEmpty nestedStruct
+	StructEmpty struct{}
 }
 
-func TestMarshal(t *testing.T) {
-	ts := time.Unix(0, 0).UTC()
-	withVals := testStruct{
+var (
+	ts = time.Unix(0, 0).UTC()
+
+	withVals = testStruct{
 		T:      ts,
 		TEmpty: time.Time{},
 		Level:  "one",
@@ -72,24 +75,82 @@ func TestMarshal(t *testing.T) {
 			},
 		},
 	}
+)
 
+func TestMarshal(t *testing.T) {
+
+	// Populated testStruct
 	b, err := Marshal(withVals)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if string(b) != `{"T":"1970-01-01T00:00:00Z","Level":"one","Custom":"value","Nested":{"T":"1970-01-01T00:00:00Z","Level":"two","Custom":"test"}}` {
-		t.Fatal(string(b))
+	want := `{"T":"1970-01-01T00:00:00Z","Level":"one","Custom":"value","Nested":{"T":"1970-01-01T00:00:00Z","Level":"two","Custom":"test"}}`
+	if string(b) != want {
+		t.Fatalf("Failed want!\nWanted:\n%s\nGot:\n%s", want, string(b))
+	} else {
+		t.Log("Populated testStruct: OK!")
+	}
+
+	// Zero value testStruct
+	b, err = Marshal(testStruct{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want = `{}`
+	if string(b) != want {
+		t.Fatalf("Failed want!\nWanted:\n%s\nGot:\n%s", want, string(b))
+	} else {
+		t.Logf("Zero value testStruct: OK!")
+	}
+
+	// Empty struct.
+	b, err = Marshal(struct{}{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want = `{}`
+	if string(b) != want {
+		t.Fatalf("Failed want!\nWanted:\n%s\nGot:\n%s", want, string(b))
+	} else {
+		t.Logf("Empty struct: OK!")
+	}
+
+	// Slice of empty structs.
+	b, err = Marshal([]struct{}{{}, {}, {}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	want = `[{},{},{}]`
+	if string(b) != want {
+		t.Fatalf("Want, got:\n%s\n%s", want, string(b))
+	} else {
+		t.Logf("Slice of empty struct: OK!")
+	}
+}
+
+func TestMarshalCustom(t *testing.T) {
+
+	// With values
+	b, err := MarshalCustom(withVals, OptionTime)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := `{"T":"1970-01-01T00:00:00Z","Level":"one","Custom":"value","CustomEmpty":null,"Nested":{"T":"1970-01-01T00:00:00Z","Level":"two","Custom":"test","CustomEmpty":null},"NestedEmpty":{"Custom":null,"CustomEmpty":null}}`
+	if string(b) != want {
+		t.Fatalf("Failed want!\nWanted:\n%s\nGot:\n%s", want, string(b))
 	} else {
 		t.Log("With values: OK!")
 		t.Log(string(b))
 	}
 
-	b, err = Marshal(testStruct{})
+	// With no values
+	b, err = MarshalCustom(testStruct{}, OptionTime)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if string(b) != `{}` {
-		t.Fatal(string(b))
+	want = `{"Custom":null,"CustomEmpty":null,"Nested":{"Custom":null,"CustomEmpty":null},"NestedEmpty":{"Custom":null,"CustomEmpty":null}}`
+	if string(b) != want {
+		t.Fatalf("Failed want!\nWanted:\n%s\nGot:\n%s", want, string(b))
 	} else {
 		t.Log("With no values: OK!")
 		t.Log(string(b))
