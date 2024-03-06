@@ -10,6 +10,16 @@ result from custom MarshalJSON implementations.
 ## Example
 
 ```go
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"time"
+
+	"github.com/Delicious-Bacon/jsonomit"
+)
+
 type customStruct struct {
 	Value any
 	valid bool
@@ -46,9 +56,9 @@ type testStruct struct {
 var (
 	ts = time.Unix(0, 0).UTC()
 
-	testStruct = testStruct{
+	withVal = testStruct{
 		T:          ts,
-		TEmpty:     time.Time{}, // will be omitted
+		TEmpty:     time.Time{},                     // will be omitted
 		StringTrap: `"Time":"0001-01-01T00:00:00Z"`, // won't be omitted
 		Custom: customStruct{
 			Value: "value",
@@ -82,24 +92,28 @@ var (
 )
 
 func main() {
-    b, _ := Marshal(testStruct)
+    // ============================
+    // Clean all empty values.
+    // ============================
+	b, _ := jsonomit.MarshalIndent(withVal, "", "    ")
 
-	// Output: {"T":"1970-01-01T00:00:00Z","StringTrap":"\"Time\":\"0001-01-01T00:00:00Z\"","Custom":"value","Nested":{"T":"1970-01-01T00:00:00Z","StringTrap":"\"MyStruct\":null","Custom":"test"}}
+	fmt.Println(string(b))
+	// Output:
+	// {
+	//     "T": "1970-01-01T00:00:00Z",
+	//     "StringTrap": "\"Time\":\"0001-01-01T00:00:00Z\"",
+	//     "Custom": "value",
+	//     "Nested": {
+	//       "T": "1970-01-01T00:00:00Z",
+	//       "StringTrap": "\"MyStruct\":null",
+	//       "Custom": "test"
+	//     }
+	// }
 
-    // Output with MarshalIndent:
-    // {
-    //     "T": "1970-01-01T00:00:00Z",
-    //     "StringTrap": "\"Time\":\"0001-01-01T00:00:00Z\"",
-    //     "Custom": "value",
-    //     "Nested": {
-    //       "T": "1970-01-01T00:00:00Z",
-    //       "StringTrap": "\"MyStruct\":null",
-    //       "Custom": "test"
-    //     }
-    // }
-
-    // Customized marshal cleaning
-	b, _ = MarshalCustomIndent(
+    // ============================
+	// Customized marshal cleaning.
+    // ============================
+    b, _ = jsonomit.MarshalCustomIndent(
         map[string]struct{
             T time.Time
         }{
@@ -107,19 +121,21 @@ func main() {
             "b": {},
             "c": {},
         },
-        OptionTime, // Clean zero time.Time structs.
-        // OptionNull, -> Would clean null fields.
-        // OptionStruct, -> Would remove keys with empty structs.
+        "", // Prefix.
+        "    ", // Indent.
+        jsonomit.OptionTime, // Clean zero time.Time structs.
+        // jsonomit.OptionNull, -> Would clean null fields.
+        // jsonomit.OptionStruct, -> Would remove keys with empty structs.
     )
 
-    // Preserves map keys.
+    fmt.Println(string(b))
 	// Output:
-    // {
-    //   "a": {
-    //     "T": "1970-01-01T00:00:00Z"
-    //   },
-    //   "b": {},
-    //   "c": {}
-    // }
+	// {
+	//   "a": {
+	//     "T": "1970-01-01T00:00:00Z"
+	//   },
+	//   "b": {},
+	//   "c": {}
+	// }
 }
 ```
