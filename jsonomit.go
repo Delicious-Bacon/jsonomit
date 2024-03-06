@@ -12,9 +12,9 @@ import (
 )
 
 var (
-	emptyTimeRGX   = regexp.MustCompile(`":"0001-01-01T00:00:00Z",?`)
-	nullFieldRGX   = regexp.MustCompile(`":null,?`)
-	emptyStructRGX = regexp.MustCompile(`":{},?`)
+	emptyTimeRGX   = regexp.MustCompile(`"\w+":"0001-01-01T00:00:00Z",?`)
+	nullFieldRGX   = regexp.MustCompile(`"\w+":null,?`)
+	emptyStructRGX = regexp.MustCompile(`"\w+":{},?`)
 
 	cleanupRgxs = []*regexp.Regexp{
 		emptyTimeRGX,
@@ -27,7 +27,7 @@ var (
 	}
 
 	// Cleans up empty time.Time fields.
-	/* "0001-01-01T00:00:00Z" */
+	/* "field":"0001-01-01T00:00:00Z" */
 	OptionTime = option{1}
 	// Cleans up null fields.
 	/* "field":null */
@@ -55,36 +55,15 @@ func Marshal(v any) ([]byte, error) {
 	// Clean the JSON from empty values.
 	for _, rgx := range cleanupRgxs {
 
-		if matches := rgx.FindAllIndex(b, -1); len(matches) > 0 {
-
-			for i := len(matches) - 1; i >= 0; i-- {
-				for j := matches[i][0] - 1; j >= 0; j-- {
-					if b[j] == '"' {
-						b = append(b[:j], b[matches[i][1]:]...)
-						break
-					}
-				}
-			}
-		}
+		b = rgx.ReplaceAll(b, []byte(""))
 	}
 	b = bytes.Replace(b, []byte(`,}`), []byte(`}`), -1)
 
 	// Clean the JSON from empty structs.
-	for {
-		if matches := emptyStructRGX.FindAllIndex(b, -1); len(matches) > 0 {
+	for emptyStructRGX.Match(b) {
 
-			for i := len(matches) - 1; i >= 0; i-- {
-				for j := matches[i][0] - 1; j >= 0; j-- {
-					if b[j] == '"' {
-						b = append(b[:j], b[matches[i][1]:]...)
-						break
-					}
-				}
-			}
-			b = bytes.Replace(b, []byte(`,}`), []byte(`}`), -1)
-		} else {
-			break
-		}
+		b = emptyStructRGX.ReplaceAll(b, []byte(""))
+		b = bytes.Replace(b, []byte(`,}`), []byte(`}`), -1)
 	}
 
 	return b, nil
@@ -108,35 +87,16 @@ func MarshalCustom(v any, opts ...option) ([]byte, error) {
 	// Clean the JSON from empty values of the given options.
 	for _, opt := range opts {
 
-		if matches := opt_Rgx[opt].FindAllIndex(b, -1); len(matches) > 0 {
-
-			for i := len(matches) - 1; i >= 0; i-- {
-				for j := matches[i][0] - 1; j >= 0; j-- {
-					if b[j] == '"' {
-						b = append(b[:j], b[matches[i][1]:]...)
-						break
-					}
-				}
-			}
-		}
+		b = opt_Rgx[opt].ReplaceAll(b, []byte(""))
 	}
 	b = bytes.Replace(b, []byte(`,}`), []byte(`}`), -1)
 
-	for {
-		if matches := emptyStructRGX.FindAllIndex(b, -1); len(matches) > 0 {
+	// Clean the JSON from empty structs.
+	for emptyStructRGX.Match(b) {
 
-			for i := len(matches) - 1; i >= 0; i-- {
-				for j := matches[i][0] - 1; j >= 0; j-- {
-					if b[j] == '"' {
-						b = append(b[:j], b[matches[i][1]:]...)
-						break
-					}
-				}
-			}
-			b = bytes.Replace(b, []byte(`,}`), []byte(`}`), -1)
-		} else {
-			break
-		}
+		b = emptyStructRGX.ReplaceAll(b, []byte(""))
+
+		b = bytes.Replace(b, []byte(`,}`), []byte(`}`), -1)
 	}
 
 	return b, nil

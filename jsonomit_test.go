@@ -22,7 +22,7 @@ func (s customStruct) MarshalJSON() ([]byte, error) {
 type nestedStruct struct {
 	T           time.Time
 	TEmpty      time.Time
-	Level       string `json:",omitempty"`
+	StringTrap  string `json:",omitempty"`
 	Custom      customStruct
 	CustomEmpty customStruct
 	StructEmpty struct{}
@@ -31,7 +31,7 @@ type nestedStruct struct {
 type testStruct struct {
 	T           time.Time
 	TEmpty      time.Time
-	Level       string `json:",omitempty"`
+	StringTrap  string `json:",omitempty"`
 	Custom      customStruct
 	CustomEmpty customStruct
 	Nested      nestedStruct
@@ -43,9 +43,9 @@ var (
 	ts = time.Unix(0, 0).UTC()
 
 	withVals = testStruct{
-		T:      ts,
-		TEmpty: time.Time{},
-		Level:  "one",
+		T:          ts,
+		TEmpty:     time.Time{},
+		StringTrap: `"Time":"0001-01-01T00:00:00Z"`,
 		Custom: customStruct{
 			Value: "value",
 			valid: true,
@@ -55,9 +55,9 @@ var (
 			valid: false,
 		},
 		Nested: nestedStruct{
-			T:      ts,
-			TEmpty: time.Time{},
-			Level:  "two",
+			T:          ts,
+			TEmpty:     time.Time{},
+			StringTrap: `"MyStruct":null`,
 			Custom: customStruct{
 				Value: "test",
 				valid: true,
@@ -84,7 +84,7 @@ func TestMarshal(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := `{"T":"1970-01-01T00:00:00Z","Level":"one","Custom":"value","Nested":{"T":"1970-01-01T00:00:00Z","Level":"two","Custom":"test"}}`
+	want := `{"T":"1970-01-01T00:00:00Z","StringTrap":"\"Time\":\"0001-01-01T00:00:00Z\"","Custom":"value","Nested":{"T":"1970-01-01T00:00:00Z","StringTrap":"\"MyStruct\":null","Custom":"test"}}`
 	if string(b) != want {
 		t.Fatalf("Failed want!\nWanted:\n%s\nGot:\n%s", want, string(b))
 	} else {
@@ -135,7 +135,7 @@ func TestMarshalCustom(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	want := `{"T":"1970-01-01T00:00:00Z","Level":"one","Custom":"value","CustomEmpty":null,"Nested":{"T":"1970-01-01T00:00:00Z","Level":"two","Custom":"test","CustomEmpty":null},"NestedEmpty":{"Custom":null,"CustomEmpty":null}}`
+	want := `{"T":"1970-01-01T00:00:00Z","StringTrap":"\"Time\":\"0001-01-01T00:00:00Z\"","Custom":"value","CustomEmpty":null,"Nested":{"T":"1970-01-01T00:00:00Z","StringTrap":"\"MyStruct\":null","Custom":"test","CustomEmpty":null},"NestedEmpty":{"Custom":null,"CustomEmpty":null}}`
 	if string(b) != want {
 		t.Fatalf("Failed want!\nWanted:\n%s\nGot:\n%s", want, string(b))
 	} else {
