@@ -20,6 +20,10 @@ var (
 	}
 )
 
+// Marshal returns the JSON encoding of v clean of empty values
+// (zero time, null fields and empty structs).
+// Reference the standard json package for JSON encoding information:
+// https://pkg.go.dev/encoding/json.
 func Marshal(v any) ([]byte, error) {
 	// Do the standard JSON marshal.
 	b, err := json.Marshal(v)
