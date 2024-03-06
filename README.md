@@ -9,6 +9,8 @@ result from custom MarshalJSON implementations.
 
 ## Example
 
+Working example on goplay: https://goplay.tools/snippet/Az0AigVRcQd
+
 ```go
 package main
 
