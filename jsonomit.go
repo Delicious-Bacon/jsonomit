@@ -15,15 +15,18 @@ var (
 	emptyTimeRGX   = regexp.MustCompile(`"\w+":"0001-01-01T00:00:00Z",?`)
 	nullFieldRGX   = regexp.MustCompile(`"\w+":null,?`)
 	emptyStructRGX = regexp.MustCompile(`"\w+":{},?`)
+	zeroNumRGX     = regexp.MustCompile(`"\w+":0(?:,|("|{|\[))`)
 
 	cleanupRgxs = []*regexp.Regexp{
 		emptyTimeRGX,
 		nullFieldRGX,
+		zeroNumRGX,
 	}
 
 	opt_Rgx = map[option]*regexp.Regexp{
-		OptionTime: emptyTimeRGX,
-		OptionNull: nullFieldRGX,
+		OptionTime:    emptyTimeRGX,
+		OptionNull:    nullFieldRGX,
+		OptionZeroNum: zeroNumRGX,
 	}
 
 	// Cleans up empty time.Time fields.
@@ -35,6 +38,10 @@ var (
 	// Cleans up empty structs.
 	/* "field":{} */
 	OptionStruct = option{3}
+	// Cleans up zero number fields. Useful when external package
+	// does not omitempty on zero number fields.
+	/* "field":0 */
+	OptionZeroNum = option{4}
 )
 
 // option is used to specify which fields to clean up from the JSON
@@ -58,7 +65,7 @@ func Marshal(v any) ([]byte, error) {
 	// Clean the JSON from empty values.
 	for _, rgx := range cleanupRgxs {
 
-		b = rgx.ReplaceAll(b, []byte(""))
+		b = rgx.ReplaceAll(b, []byte("$1"))
 	}
 	b = bytes.Replace(b, []byte(`,}`), []byte(`}`), -1)
 
@@ -115,7 +122,7 @@ func MarshalCustom(v any, opts ...option) ([]byte, error) {
 			continue
 		}
 
-		b = opt_Rgx[opt].ReplaceAll(b, []byte(""))
+		b = opt_Rgx[opt].ReplaceAll(b, []byte("$1"))
 	}
 	if count > 0 {
 		b = bytes.Replace(b, []byte(`,}`), []byte(`}`), -1)
