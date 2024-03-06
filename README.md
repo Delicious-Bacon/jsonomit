@@ -87,8 +87,20 @@ func main() {
 
 	// Output: {"T":"1970-01-01T00:00:00Z","StringTrap":"\"Time\":\"0001-01-01T00:00:00Z\"","Custom":"value","Nested":{"T":"1970-01-01T00:00:00Z","StringTrap":"\"MyStruct\":null","Custom":"test"}}
 
+    // Output with MarhalIndent:
+    // {
+    //   "T": "1970-01-01T00:00:00Z",
+    //   "StringTrap": "\"Time\":\"0001-01-01T00:00:00Z\"",
+    //   "Custom": "value",
+    //   "Nested": {
+    //     "T": "1970-01-01T00:00:00Z",
+    //     "StringTrap": "\"MyStruct\":null",
+    //     "Custom": "test"
+    //   }
+    // }
+
     // Customized marshal cleaning
-	b, _ = MarshalCustom(
+	b, _ = MarshalCustomIndent(
         map[string]struct{
             T time.Time
         }{
@@ -97,9 +109,17 @@ func main() {
             "c": {},
         },
         OptionTime, // Clean zero time.Time structs.
-        // OptionStruct, -> would remove keys with empty structs.
+        // OptionNull, -> Would clean null fields.
+        // OptionStruct, -> Would remove keys with empty structs.
     )
 
-    // Preserves map keys:
-	// Output: {"a":{"T":"1970-01-01T00:00:00Z"},"b":{},"c":{}}
+    // Preserves map keys.
+	// Output:
+    // {
+    //   "a": {
+    //     "T": "1970-01-01T00:00:00Z"
+    //   },
+    //   "b": {},
+    //   "c": {}
+    // }
 }

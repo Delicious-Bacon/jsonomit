@@ -140,6 +140,26 @@ func TestMarshal(t *testing.T) {
 	}
 }
 
+func TestMarshalIndent(t *testing.T) {
+	b, err := MarshalIndent(withVals, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := `{
+  "T": "1970-01-01T00:00:00Z",
+  "StringTrap": "\"Time\":\"0001-01-01T00:00:00Z\"",
+  "Custom": "value",
+  "Nested": {
+    "T": "1970-01-01T00:00:00Z",
+    "StringTrap": "\"MyStruct\":null",
+    "Custom": "test"
+  }
+}`
+	if string(b) != want {
+		t.Fatalf("Want, got:\n%s\n%s", want, string(b))
+	}
+}
+
 func TestMarshalCustom(t *testing.T) {
 
 	// With values

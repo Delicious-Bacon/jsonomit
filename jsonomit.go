@@ -72,6 +72,23 @@ func Marshal(v any) ([]byte, error) {
 	return b, nil
 }
 
+// MarshalIndent is like Marshal but applies Indent to format the output.
+// Each JSON element in the output will begin on a new line beginning with prefix
+// followed by one or more copies of indent according to the indentation nesting.
+func MarshalIndent(v any, prefix, indent string) ([]byte, error) {
+	b, err := Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+
+	b2 := bytes.NewBuffer([]byte{})
+	err = json.Indent(b2, b, prefix, indent)
+	if err != nil {
+		return nil, err
+	}
+	return b2.Bytes(), nil
+}
+
 // MarshalCustom returns the JSON encoding of v clean of
 // empty values for the given options.
 //
@@ -115,4 +132,20 @@ func MarshalCustom(v any, opts ...option) ([]byte, error) {
 	}
 
 	return b, nil
+}
+
+// MarshalIndentCustom is like MarshalCustom but applies Indent to format the output.
+// Each JSON element in the output will begin on a new line beginning with prefix
+// followed by one or more copies of indent according to the indentation nesting.
+func MarshalIndentCustom(v any, prefix, indent string, opts ...option) ([]byte, error) {
+	b, err := MarshalCustom(v, opts...)
+	if err != nil {
+		return nil, err
+	}
+	b2 := bytes.NewBuffer([]byte{})
+	err = json.Indent(b2, b, prefix, indent)
+	if err != nil {
+		return nil, err
+	}
+	return b2.Bytes(), nil
 }
