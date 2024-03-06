@@ -134,10 +134,10 @@ func MarshalCustom(v any, opts ...option) ([]byte, error) {
 	return b, nil
 }
 
-// MarshalIndentCustom is like MarshalCustom but applies Indent to format the output.
+// MarshalCustomIndent is like MarshalCustom but applies Indent to format the output.
 // Each JSON element in the output will begin on a new line beginning with prefix
 // followed by one or more copies of indent according to the indentation nesting.
-func MarshalIndentCustom(v any, prefix, indent string, opts ...option) ([]byte, error) {
+func MarshalCustomIndent(v any, prefix, indent string, opts ...option) ([]byte, error) {
 	b, err := MarshalCustom(v, opts...)
 	if err != nil {
 		return nil, err
