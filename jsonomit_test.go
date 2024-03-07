@@ -43,6 +43,14 @@ type testStruct struct {
 	StructEmpty struct{}
 }
 
+type icon struct {
+	Pixels  []uint16 // missing omitempty
+	ImgSize point    // missing omitempty
+}
+type point struct {
+	X, Y int // missing omitempty
+}
+
 var (
 	ts = time.Unix(0, 0).UTC()
 
@@ -166,6 +174,18 @@ func TestMarshal(t *testing.T) {
 		t.Fatal(err)
 	}
 	want = `{"T":"1970-01-01T00:00:00Z","StringTrap":"\"Time\":\"0001-01-01T00:00:00Z\"","Num":0.1,"Custom":"value","Nested":{"T":"1970-01-01T00:00:00Z","StringTrap":"\"MyStruct\":null","Custom":"value"}}`
+	if string(b) != want {
+		t.Fatalf("Failed 'all together' want!\n%s\n%s", want, string(b))
+	} else {
+		t.Logf("All together: OK!")
+	}
+
+	b, err = Marshal(icon{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	want = `{}`
 	if string(b) != want {
 		t.Fatalf("Failed 'all together' want!\n%s\n%s", want, string(b))
 	} else {

@@ -15,7 +15,7 @@ var (
 	emptyTimeRGX   = regexp.MustCompile(`"\w+":"0001-01-01T00:00:00Z",?`)
 	nullFieldRGX   = regexp.MustCompile(`"\w+":null,?`)
 	emptyStructRGX = regexp.MustCompile(`"\w+":{},?`)
-	zeroNumRGX     = regexp.MustCompile(`"\w+":0(?:,|("|{|\[))`)
+	zeroNumRGX     = regexp.MustCompile(`"\w+":0(?:,|("|{|}|\[|\]))`)
 
 	cleanupRgxs = []*regexp.Regexp{
 		emptyTimeRGX,
