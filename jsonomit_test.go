@@ -180,6 +180,7 @@ func TestMarshal(t *testing.T) {
 		t.Logf("All together: OK!")
 	}
 
+	// Icon
 	b, err = Marshal(icon{})
 	if err != nil {
 		t.Fatal(err)
@@ -187,9 +188,9 @@ func TestMarshal(t *testing.T) {
 
 	want = `{}`
 	if string(b) != want {
-		t.Fatalf("Failed 'all together' want!\n%s\n%s", want, string(b))
+		t.Fatalf("Failed 'icon' want!\n%s\n%s", want, string(b))
 	} else {
-		t.Logf("All together: OK!")
+		t.Logf("Icon: OK!")
 	}
 }
 
